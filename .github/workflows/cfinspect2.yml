@@ -1,0 +1,16 @@
+name: cfinspect2
+on:
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: inspect
+        run: |
+          echo "runner ip: $(curl -sS https://api.ipify.org)"
+          probe () { curl -sS -o b.html -w "code=%{http_code} bytes=%{size_download}\n" "$@" https://velor.win/ || true; grep -o "<title>[^<]*</title>" b.html | head -1 || true; }
+          echo "[1 plain]"; probe
+          echo "[2 chrome-ua]"; probe -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0 Safari/537.36"
+          echo "[3 chrome-ua-full]"; probe -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0 Safari/537.36" -H "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8" -H "accept-language: en-US,en;q=0.9"
+          echo "[4 node-ua]"; probe -A "node"
+          echo "[5 empty-ua]"; probe -A ""
