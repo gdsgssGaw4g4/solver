@@ -1,0 +1,25 @@
+name: solve
+on:
+  workflow_dispatch:
+jobs:
+  solve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install --no-audit --no-fund --loglevel=error puppeteer-core
+      - name: runner ip
+        run: curl -sS https://api.ipify.org && echo
+      - name: solve
+        run: xvfb-run -a node solve.js || node solve.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cookie
+          path: |
+            cf_cookie.txt
+            cf_ua.txt
+            step.log
