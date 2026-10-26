@@ -1,0 +1,13 @@
+name: cfinspect4
+on:
+  workflow_dispatch:
+jobs:
+  v6:
+    runs-on: ubuntu-latest
+    steps:
+      - name: v6 probe
+        run: |
+          echo "v4 egress: $(curl -sS -4 --max-time 8 https://api.ipify.org || true)"
+          echo "v6 egress: $(curl -sS -6 --max-time 8 https://api64.ipify.org || true)"
+          echo "velor via v6: $(curl -sS -6 -o /dev/null -w "%{http_code}" --max-time 8 https://velor.win/ || true)"
+          echo "velor via v4: $(curl -sS -4 -o /dev/null -w "%{http_code}" --max-time 8 https://velor.win/ || true)"
