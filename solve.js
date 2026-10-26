@@ -32,7 +32,8 @@ async function clickWidget(page){
     await sleep(1000);
     try{title=await page.title();}catch(e){}
     if(i%15===0)L('tick '+i+' \"'+title+'\"');
-    if(i>=3 && i%3===0){ const r=await clickWidget(page); if(r&&i===3)L('clicked at widget '+r); }
+    if(i>=3 && i%3===0){ const r=await clickWidget(page); if(r)L('CLICK@'+i+' '+r); }
+    if(i===45||i===90||i===135){ await page.reload({waitUntil:'domcontentloaded'}).catch(()=>{}); L('reload@'+i+'s'); }
     if(title&&!/Just a moment|Attention Required/i.test(title)){ cleared=true; L('CLEARED('+i+'s): '+title); break; }
   }
   const cookies=await page.cookies(); const cf=cookies.find(c=>c.name==='cf_clearance');
