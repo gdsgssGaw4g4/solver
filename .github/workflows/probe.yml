@@ -1,0 +1,26 @@
+name: probe
+on:
+  workflow_dispatch:
+    inputs:
+      direct:
+        default: "1"
+      mode:
+        default: probe
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: runner ip
+        run: curl -sS https://api.ipify.org && echo
+      - name: probe
+        run: ORIGIN_DIRECT="${{ github.event.inputs.direct }}" node load_probe.js "${{ github.event.inputs.mode }}" 2 5 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-out
+          path: atk_*.out
