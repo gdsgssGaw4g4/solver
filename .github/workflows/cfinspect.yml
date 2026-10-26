@@ -1,0 +1,16 @@
+name: cfinspect
+on:
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: inspect
+        run: |
+          echo "runner ip: $(curl -sS https://api.ipify.org)"
+          curl -sS -o body.html -w "root code=%{http_code} bytes=%{size_download} time=%{time_total}\n" https://velor.win/ || true
+          grep -o "<title>[^<]*</title>" body.html | head -1 || true
+          echo "cf_chl_opt present: $(grep -c _cf_chl_opt body.html || true)"
+          echo "error code: $(grep -o -E 'error code: [0-9]+' body.html | head -1 || true)"
+          curl -sS -o api.html -w "api/health code=%{http_code} bytes=%{size_download}\n" https://velor.win/api/health || true
+          head -c 300 api.html; echo
